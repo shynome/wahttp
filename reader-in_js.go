@@ -8,7 +8,7 @@ import (
 	promise "github.com/nlepage/go-js-promise"
 )
 
-type JSReader struct {
+type JsReader struct {
 	jsReader js.Value //
 
 	r io.Reader
@@ -17,9 +17,9 @@ type JSReader struct {
 	locker sync.Locker
 }
 
-func NewJSReader(v js.Value) *JSReader {
+func NewJSReader(v js.Value) *JsReader {
 	r, w := io.Pipe()
-	return &JSReader{
+	return &JsReader{
 		jsReader: v,
 
 		r: r, w: w,
@@ -28,7 +28,7 @@ func NewJSReader(v js.Value) *JSReader {
 	}
 }
 
-func (jr *JSReader) readFromJS() {
+func (jr *JsReader) readFromJS() {
 	jr.locker.Lock()
 	defer jr.locker.Unlock()
 
@@ -59,7 +59,7 @@ func copyFromJS(w io.Writer, v js.Value) {
 	}
 }
 
-func (jr *JSReader) Read(p []byte) (n int, err error) {
+func (jr *JsReader) Read(p []byte) (n int, err error) {
 	go jr.readFromJS()
 	return jr.r.Read(p)
 }
