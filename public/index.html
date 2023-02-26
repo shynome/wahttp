@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wahttp</title>
+  </head>
+  <body>
+    <script src="https://go.dev/misc/wasm/wasm_exec.js"></script>
+    <script>
+      // WebAssembly.instantiate
+      let go = new Go();
+      WebAssembly.instantiateStreaming(
+        fetch("/main.wasm"),
+        go.importObject
+      ).then(async ({ instance }) => {
+        go.run(instance);
+        let req = new Request("/");
+        /**@type {Response}*/
+        let resp = await GoFetch(req);
+        let content = await resp.text();
+        console.log(content);
+      });
+    </script>
+  </body>
+</html>
