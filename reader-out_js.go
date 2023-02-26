@@ -58,14 +58,19 @@ func (r *GoReader) JsRead(c controller) {
 	offset := r.readed
 	n, err := r.Read(dst)
 
-	if err != nil {
-		if errors.Is(err, io.EOF) {
+	if errors.Is(err, io.EOF) {
+		if n == 0 {
 			c.close()
 			return
 		}
+		err = nil
+	}
+
+	if err != nil {
 		c.error(err)
 		return
 	}
+
 	r.readed = offset + n
 	c.enqueue(dst[:n])
 }
