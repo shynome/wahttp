@@ -1,7 +1,9 @@
 package wahttp
 
 import (
+	"errors"
 	"io"
+	"sync"
 	"syscall/js"
 )
 
@@ -9,6 +11,7 @@ type GoReader struct {
 	io.Reader
 	chunkSize int
 	readed    int
+	locker    sync.Locker
 }
 
 func NewGoReader(r io.Reader) *GoReader {
@@ -16,46 +19,58 @@ func NewGoReader(r io.Reader) *GoReader {
 		Reader: r,
 
 		chunkSize: 512,
+		locker:    &sync.Mutex{},
 	}
 }
 
 func (r *GoReader) Export() js.Value {
 	root := js.Global().Get("Object").New()
 	root.Set("type", "bytes")
-	// root.Set("autoAllocateChunkSize", r.chunkSize)
+	root.Set("autoAllocateChunkSize", r.chunkSize)
 	// root.Set("start", js.FuncOf(func(this js.Value, args []js.Value) any {
 	// 	// c := controller(args[0])
 	// 	return nil
 	// }))
 	root.Set("pull", js.FuncOf(func(this js.Value, args []js.Value) any {
 		c := controller(args[0])
-		var dst = make([]byte, r.chunkSize)
-		offset := r.readed
-		n, err := r.Read(dst)
-
-		if err != nil {
-			c.close()
-			return nil
-		}
-		r.readed = offset + n
-		c.enqueue(dst[:n])
+		go r.JsRead(c)
 		return nil
 	}))
 	// root.Set("cancel", js.FuncOf(func(this js.Value, args []js.Value) any {
 	// 	return nil
 	// }))
-	return root
+	rstream := js.Global().Get("ReadableStream").New(root)
+	return rstream
+}
+
+func (r *GoReader) JsRead(c controller) {
+	r.locker.Lock()
+	defer r.locker.Unlock()
+
+	var dst = make([]byte, r.chunkSize)
+	offset := r.readed
+	n, err := r.Read(dst)
+
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			c.close()
+			return
+		}
+		c.error(err)
+		return
+	}
+	r.readed = offset + n
+	c.enqueue(dst[:n])
 }
 
 type controller js.Value
 
 func (c controller) enqueue(buf []byte) {
-	jsBytes := js.Global().Get("Uint8Array").New(len(buf))
-	js.CopyBytesToJS(jsBytes, buf)
+	jsBytes := js.Global().Get("Uint8Array").New(cap(buf))
+	n := js.CopyBytesToJS(jsBytes, buf)
 
 	jsBuf := jsBytes.Get("buffer")
-
-	chunk := js.Global().Get("DataView").New(jsBuf)
+	chunk := js.Global().Get("DataView").New(jsBuf, 0, n)
 
 	req := c.byobRequest()
 	if !req.IsNull() {
@@ -67,6 +82,9 @@ func (c controller) enqueue(buf []byte) {
 }
 func (c controller) close() {
 	js.Value(c).Call("close")
+}
+func (c controller) error(err error) {
+	js.Value(c).Call("error", err.Error())
 }
 func (c controller) desiredSize() int {
 	return js.Value(c).Get("desiredSize").Int()
