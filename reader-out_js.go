@@ -14,13 +14,20 @@ type GoReader struct {
 	locker    sync.Locker
 }
 
+// 16kib
+const defaultChunkSize = 16 * 1024
+
 func NewGoReader(r io.Reader) *GoReader {
 	return &GoReader{
 		Reader: r,
 
-		chunkSize: 512,
+		chunkSize: defaultChunkSize,
 		locker:    &sync.Mutex{},
 	}
+}
+
+func (r *GoReader) SetChunkSize(chunkSize int) {
+	r.chunkSize = chunkSize
 }
 
 func (r *GoReader) Export() js.Value {
