@@ -43,7 +43,6 @@ func (r *GoReader) Export() js.Value {
 		p, resolve, reject := promise.New()
 		go func() {
 			if err := r.JsRead(c); err != nil {
-				defer r.Close()
 				reject(err.Error())
 				return
 			}
