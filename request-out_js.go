@@ -13,9 +13,11 @@ const jsFetchRedirect = "js.fetch:redirect"
 func GoRequest(req *http.Request) js.Value {
 	rInit := js.Global().Get("Object").New()
 
-	if req.Body != nil {
+	if req.Body != nil && req.ContentLength != 0 {
 		jsBody := NewGoReader(req.Body)
 		rInit.Set("body", jsBody.Export())
+		// https://github.com/nodejs/node/issues/46221#issuecomment-1482439958
+		rInit.Set("duplex", "half")
 	}
 
 	rInit.Set("method", req.Method)
@@ -49,6 +51,12 @@ func GoRequest(req *http.Request) js.Value {
 	}()
 	rInit.Set("signal", ac.Get("signal"))
 
-	r := js.Global().Get("Request").New(req.URL.String(), rInit)
+	link := req.Host + req.RequestURI
+	if req.TLS != nil {
+		link = "https://" + link
+	} else {
+		link = "http://" + link
+	}
+	r := js.Global().Get("Request").New(link, rInit)
 	return r
 }
