@@ -17,6 +17,9 @@ type JsReader struct {
 	locker sync.Locker
 }
 
+var _ io.Reader = (*JsReader)(nil)
+var _ io.Closer = (*JsReader)(nil)
+
 func NewJSReader(v js.Value) *JsReader {
 	r, w := io.Pipe()
 	return &JsReader{
@@ -62,4 +65,9 @@ func copyFromJS(w io.Writer, v js.Value) {
 func (jr *JsReader) Read(p []byte) (n int, err error) {
 	go jr.readFromJS()
 	return jr.r.Read(p)
+}
+
+func (jr *JsReader) Close() error {
+	jr.jsReader.Call("cancel")
+	return nil
 }
