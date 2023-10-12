@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6] - 2023-10-12
+
+### Fix
+
+- GoRequest 的 url 不全, 预期为`http://127.0.0.1/`却只有`/`导致的 panic
+- GoRequest ContentLength 为 0 时不必设置 body
+
 ## [0.0.5] - 2023-10-12
 
 ### Add
