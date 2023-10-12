@@ -1,4 +1,4 @@
-github.com/lainio/err2 v0.8.14 h1:B6pN8cBlo2Itwrb/aVS5Mbu/CyFxqNFfxjYsU1bko34=
-github.com/lainio/err2 v0.8.14/go.mod h1:5d/fy7+ytZJEybxIPN/LGEfvnU4y+JWE1tZAWRECJqY=
 github.com/nlepage/go-js-promise v1.1.0 h1:BfvywsIMo4cpNOKyoReBWkxEW8f9HMwXqGc45wEKPRs=
 github.com/nlepage/go-js-promise v1.1.0/go.mod h1:bdOP0wObXu34euibyK39K1hoBCtlgTKXGc56AGflaRo=
+github.com/shynome/err0 v0.1.0 h1:+cWnUkE2kZ9fFTTOrgSkoPzBuSppywI9gd0EFQrFaDw=
+github.com/shynome/err0 v0.1.0/go.mod h1:n5YVOAf8QSa8LMWWFKCXoHQjAjwjywKFiORV/btN3Aw=
