@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.7] - 2025-01-03
+
+- 添加了 JsWriter, 用于构建 js 和 golang 程序之间的 yamux stdio
+
 ## [0.0.6] - 2023-10-12
 
 ### Fix
