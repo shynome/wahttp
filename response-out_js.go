@@ -17,6 +17,10 @@ func GoResponse(resp *http.Response) js.Value {
 		}
 	}
 	rInit.Set("headers", headersIt)
-	r := js.Global().Get("Response").New(jsBody.Export(), rInit)
+	body := jsBody.Export()
+	if resp.StatusCode == http.StatusNoContent {
+		body = js.Null()
+	}
+	r := js.Global().Get("Response").New(body, rInit)
 	return r
 }
