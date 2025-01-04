@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.8] - 2025-01-04
+
+- 修复: GoResponse 状态码为 204 但 body 不为 null 导致出错的情况
+
 ## [0.0.7] - 2025-01-03
 
 - 添加了 JsWriter, 用于构建 js 和 golang 程序之间的 yamux stdio
